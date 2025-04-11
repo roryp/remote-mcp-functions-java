@@ -10,6 +10,23 @@ import com.microsoft.azure.functions.annotation.McpToolTrigger;
  * Azure Functions with HTTP Trigger.
  */
 public class Function {
+    public final String SNIPPET_NAME_PROPERTY_NAME = "snippetName";
+    public final String SNIPPET_PROPERTY_NAME = "snippet";
+    public final String SAVE_SNIPPET_ARGUMENT = 
+    "[" +
+    "   {" +
+    "      \"propertyName\":\"snippetName\"," +
+    "      \"propertyType\":\"string\"," +
+    "      \"description\":\"The name of the snippet.\"" +
+    "   }," +
+    "   {" +
+    "      \"propertyName\":\"snippet\"," +
+    "      \"propertyType\":\"string\"," +
+    "      \"description\":\"The content of the snippet.\"" +
+    "   }" +
+    "]";
+
+
     /**
     * This function is triggered by an MCP Tool Trigger.
     * It logs the trigger input and prints "Hello, World!" to the log.
@@ -22,7 +39,7 @@ public class Function {
     @McpToolTrigger(
         toolName = "getsnippets",
         description = "Gets code snippets from your snippet collection.",
-        toolProperties = "[{\"propertyName\":\"snippetname\",\"propertyType\":\"string\",\"description\":\"The name of the snippet.\"}]"
+        toolProperties = SAVE_SNIPPET_ARGUMENT
         ) String triggerInput,
         final ExecutionContext context) {
             context.getLogger().info(triggerInput);
