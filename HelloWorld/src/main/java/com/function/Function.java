@@ -1,50 +1,52 @@
 package com.function;
 
 import com.microsoft.azure.functions.ExecutionContext;
-
 import com.microsoft.azure.functions.annotation.FunctionName;
 import com.microsoft.azure.functions.annotation.McpToolTrigger;
 
-
 /**
- * Azure Functions with HTTP Trigger.
+ * Demonstrates a simple Azure Function that prints a provided string and logs "Hello, World!".
+ * This function is triggered by an MCP Tool Trigger, which provides the input JSON.
  */
 public class Function {
-    public final String SNIPPET_NAME_PROPERTY_NAME = "snippetName";
-    public final String SNIPPET_PROPERTY_NAME = "snippet";
-    public final String SAVE_SNIPPET_ARGUMENT = """
+    /**
+     * The JSON schema describing the arguments expected by the "getsnippets" tool.
+     * In this example, it expects one property named "triggerInput" which is a string.
+     */
+    public static final String ARGUMENTS = """
         [
            {
-              "propertyName":"snippetName",
-              "propertyType":"string",
-              "description":"The name of the snippet."
-           },
-           {
-              "propertyName":"snippet",
-              "propertyType":"string",
-              "description":"The content of the snippet."
+              "propertyName": "triggerInput",
+              "propertyType": "string",
+              "description": "input string"
            }
         ]
     """;
 
     /**
-    * This function is triggered by an MCP Tool Trigger.
-    * It logs the trigger input and prints "Hello, World!" to the log.
-    *
-    * @param triggerInput The input from the MCP Tool Trigger. It contains the name of the snippet.
-    * @param context The execution context of the function, used for logging.
-    */
+     * Azure function that:
+     * <ul>
+     *   <li>Logs the {@code triggerInput} provided by the MCP tool.</li>
+     *   <li>Logs "Hello, World!" to demonstrate a simple response.</li>
+     * </ul>
+     *
+     * @param triggerInput The JSON argument provided by the MCP tool. Extracted as a string.
+     * @param context      The execution context for logging and tracing function execution.
+     */
     @FunctionName("HelloWorld")
-    public String logCustomTriggerInput(
-    @McpToolTrigger(
-        toolName = "getsnippets",
-        description = "Gets code snippets from your snippet collection.",
-        toolProperties = SAVE_SNIPPET_ARGUMENT
-        ) String triggerInput,
-        final ExecutionContext context) {
-            context.getLogger().info(triggerInput);
-            context.getLogger().info("Hello, World!");
+    public void logCustomTriggerInput(
+            @McpToolTrigger(
+                    toolName = "getsnippets",
+                    description = "Gets code snippets from your snippet collection.",
+                    toolProperties = ARGUMENTS
+            )
+            String triggerInput,
+            final ExecutionContext context
+    ) {
+        // Log the input passed in from the MCP tool
+        context.getLogger().info(triggerInput);
 
-            return "I am MCP";
-        }
+        // Log a simple message
+        context.getLogger().info("Hello, World!");
+    }
 }
