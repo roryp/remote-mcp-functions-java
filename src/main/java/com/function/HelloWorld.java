@@ -8,7 +8,7 @@ import com.microsoft.azure.functions.annotation.McpToolTrigger;
  * Demonstrates a simple Azure Function that prints a provided string and logs "Hello, World!".
  * This function is triggered by an MCP Tool Trigger, which provides the input JSON.
  */
-public class Function {
+public class HelloWorld {
     /**
      * The JSON schema describing the arguments expected by the "getsnippets" tool.
      * In this example, it expects one property named "triggerInput" which is a string.

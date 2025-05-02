@@ -16,7 +16,7 @@ import com.google.gson.JsonParser;
  * This class contains two Azure Functions that demonstrate saving and retrieving text snippets
  * from Azure Blob storage, triggered by an MCP Tool Trigger annotation.
  */
-public class Function {
+public class Snippets {
 
     /**
      * The property name for the snippet's name in the JSON input.
@@ -71,7 +71,7 @@ public class Function {
                     "]";
 
     /**
-     * Azure Function that handles saving a text snippet to Azure Blob Storage.
+     * Azure Snippets that handles saving a text snippet to Azure Blob Storage.
      * <p>
      * The function is triggered via an MCP Tool Trigger. The JSON input (passed as {@code toolArguments})
      * must include "snippetName" and "snippet" as per {@link #SAVE_SNIPPET_ARGUMENTS}.
@@ -114,7 +114,7 @@ public class Function {
     }
 
     /**
-     * Azure Function that handles retrieving a text snippet from Azure Blob Storage.
+     * Azure Snippets that handles retrieving a text snippet from Azure Blob Storage.
      * <p>
      * The function is triggered by an MCP Tool Trigger. The JSON input (passed as {@code toolArguments})
      * must include "snippetName" as per {@link #GET_SNIPPET_ARGUMENTS}.
