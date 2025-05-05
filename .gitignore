@@ -76,3 +76,4 @@ test-mcp.bat
 test-mcp.js
 test-sse.bat
 test-mcp.sh
+test-mcp-diagnostic.js

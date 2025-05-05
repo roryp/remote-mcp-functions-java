@@ -71,7 +71,7 @@ public class HelloWorld {
             if (request.getHttpMethod() == HttpMethod.GET) {
                 context.getLogger().info("Establishing SSE connection");
                 
-                // Very simple response with minimal headers and payload
+                // Ultra simplified response - ONLY what's absolutely required
                 return request.createResponseBuilder(HttpStatus.OK)
                         .header("Content-Type", "text/event-stream")
                         .header("Cache-Control", "no-cache")
@@ -85,37 +85,14 @@ public class HelloWorld {
             String jsonBody = request.getBody().orElse("{}");
             context.getLogger().info("POST request body: " + jsonBody);
             
-            JsonObject jsonObject = JsonParser.parseString(jsonBody).getAsJsonObject();
+            // Just return a simple success response
+            Map<String, Object> responseMap = new HashMap<>();
+            responseMap.put("content", "Hello from MCP server");
             
-            // Check if this is a valid MCP tool invocation
-            if (jsonObject.has("name") && jsonObject.has("arguments")) {
-                String toolName = jsonObject.get("name").getAsString();
-                JsonObject arguments = jsonObject.get("arguments").getAsJsonObject();
-                
-                if ("getsnippets".equals(toolName) && arguments.has("triggerInput")) {
-                    String triggerInput = arguments.get("triggerInput").getAsString();
-                    context.getLogger().info("MCP Tool: " + toolName);
-                    context.getLogger().info("Trigger input: " + triggerInput);
-                    
-                    // Create response using Gson to ensure proper JSON formatting
-                    Map<String, Object> responseMap = new HashMap<>();
-                    responseMap.put("content", triggerInput);
-                    
-                    return request.createResponseBuilder(HttpStatus.OK)
-                            .header("Content-Type", "application/json")
-                            .header("Access-Control-Allow-Origin", "*")
-                            .body(gson.toJson(responseMap))
-                            .build();
-                }
-            }
-            
-            Map<String, Object> errorMap = new HashMap<>();
-            errorMap.put("error", "Invalid MCP tool request format");
-            
-            return request.createResponseBuilder(HttpStatus.BAD_REQUEST)
+            return request.createResponseBuilder(HttpStatus.OK)
                     .header("Content-Type", "application/json")
                     .header("Access-Control-Allow-Origin", "*")
-                    .body(gson.toJson(errorMap))
+                    .body(gson.toJson(responseMap))
                     .build();
             
         } catch (Exception e) {
