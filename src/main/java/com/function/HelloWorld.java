@@ -55,27 +55,27 @@ public class HelloWorld {
     ) {
         context.getLogger().info("Processing MCP request");
         
-        // Parse incoming request
-        String jsonBody = request.getBody().orElse("{}");
-        context.getLogger().info("Request body: " + jsonBody);
-        
         try {
-            // Handle SSE connection establishment
+            // Handle SSE connection establishment for GET requests
             if (request.getHttpMethod() == HttpMethod.GET) {
                 context.getLogger().info("Establishing SSE connection");
                 return request.createResponseBuilder(HttpStatus.OK)
                         .header("Content-Type", "text/event-stream")
                         .header("Cache-Control", "no-cache")
                         .header("Connection", "keep-alive")
-                        // Proper SSE format requires "data: " prefix and double newlines
-                        // and valid JSON for MCP protocol
+                        // Important: Only include data: with JSON and double newlines
+                        // No other text or content should be in the response
                         .body("data: {\"ready\":true}\n\n")
                         .build();
             }
             
+            // For POST requests, handle tool invocations
+            String jsonBody = request.getBody().orElse("{}");
+            context.getLogger().info("Request body: " + jsonBody);
+            
             JsonObject jsonObject = JsonParser.parseString(jsonBody).getAsJsonObject();
             
-            // Check if this is an MCP tool invocation
+            // Check if this is a valid MCP tool invocation
             if (jsonObject.has("name") && jsonObject.has("arguments")) {
                 String toolName = jsonObject.get("name").getAsString();
                 JsonObject arguments = jsonObject.get("arguments").getAsJsonObject();
@@ -84,26 +84,23 @@ public class HelloWorld {
                     String triggerInput = arguments.get("triggerInput").getAsString();
                     context.getLogger().info("MCP Tool: " + toolName);
                     context.getLogger().info("Trigger input: " + triggerInput);
-                    context.getLogger().info("Hello, World!");
                     
-                    // Return successful response with properly formatted SSE message
-                    // MCP expects a JSON response
-                    String responseJson = "{\"content\":\"" + triggerInput + "\"}";
+                    // Create properly structured response according to MCP protocol
                     return request.createResponseBuilder(HttpStatus.OK)
-                            .header("Content-Type", "text/event-stream")
-                            .body("data: " + responseJson + "\n\n")
+                            .header("Content-Type", "application/json")  // Use JSON content type for POST responses
+                            .body("{\"content\":\"" + triggerInput + "\"}")
                             .build();
                 }
             }
             
             return request.createResponseBuilder(HttpStatus.BAD_REQUEST)
-                    .body("Invalid MCP tool request format")
+                    .body("{\"error\":\"Invalid MCP tool request format\"}")
                     .build();
             
         } catch (Exception e) {
             context.getLogger().severe("Error processing request: " + e.getMessage());
             return request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error processing request: " + e.getMessage())
+                    .body("{\"error\":\"" + e.getMessage() + "\"}")
                     .build();
         }
     }
