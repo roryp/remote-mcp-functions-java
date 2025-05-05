@@ -105,6 +105,9 @@ resource functionApp 'Microsoft.Web/sites@2022-03-01' = {
     }
     httpsOnly: true
   }
+  tags: {
+    'azd-service-name': 'api'
+  }
 }
 
 // Function App system key for MCP
