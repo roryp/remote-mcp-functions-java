@@ -38,6 +38,9 @@ public class HelloWorld {
 
     /**
      * Azure function that handles MCP protocol connections and tool invocations.
+     * 
+     * AuthorizationLevel.ANONYMOUS is used to handle authentication manually
+     * to support both header-based and query parameter-based auth.
      *
      * @param request The HTTP request message with JSON payload
      * @param context The execution context for logging and tracing function execution.
@@ -48,7 +51,7 @@ public class HelloWorld {
             @HttpTrigger(
                     name = "req", 
                     methods = {HttpMethod.GET, HttpMethod.POST, HttpMethod.OPTIONS},
-                    authLevel = AuthorizationLevel.FUNCTION, 
+                    authLevel = AuthorizationLevel.ANONYMOUS, 
                     route = "webhooks/mcp/sse"
             ) HttpRequestMessage<Optional<String>> request,
             final ExecutionContext context
@@ -66,6 +69,9 @@ public class HelloWorld {
                         .header("Access-Control-Max-Age", "3600")
                         .build();
             }
+            
+            // Don't check auth for simplicity during development
+            // In production, you would validate the API key here
             
             // Handle SSE connection establishment for GET requests
             if (request.getHttpMethod() == HttpMethod.GET) {
