@@ -175,9 +175,10 @@ public class Snippets {
                     
                     // For simplicity in this version, we're returning a success response
                     // In a production version, we would use BlobInput binding to get actual content
+                    String responseJson = "{\"content\":\"Sample content for: " + snippetName + "\"}";
                     return request.createResponseBuilder(HttpStatus.OK)
                             .header("Content-Type", "text/event-stream")
-                            .body("data: {\"success\": true, \"snippet\": \"Sample content for: " + snippetName + "\"}\n\n")
+                            .body("data: " + responseJson + "\n\n")
                             .build();
                 }
             }

@@ -75,3 +75,4 @@ node_modules/*
 test-mcp.bat
 test-mcp.js
 test-sse.bat
+test-mcp.sh

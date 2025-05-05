@@ -60,6 +60,19 @@ public class HelloWorld {
         context.getLogger().info("Request body: " + jsonBody);
         
         try {
+            // Handle SSE connection establishment
+            if (request.getHttpMethod() == HttpMethod.GET) {
+                context.getLogger().info("Establishing SSE connection");
+                return request.createResponseBuilder(HttpStatus.OK)
+                        .header("Content-Type", "text/event-stream")
+                        .header("Cache-Control", "no-cache")
+                        .header("Connection", "keep-alive")
+                        // Proper SSE format requires "data: " prefix and double newlines
+                        // and valid JSON for MCP protocol
+                        .body("data: {\"ready\":true}\n\n")
+                        .build();
+            }
+            
             JsonObject jsonObject = JsonParser.parseString(jsonBody).getAsJsonObject();
             
             // Check if this is an MCP tool invocation
@@ -73,23 +86,14 @@ public class HelloWorld {
                     context.getLogger().info("Trigger input: " + triggerInput);
                     context.getLogger().info("Hello, World!");
                     
-                    // Return successful response with data
+                    // Return successful response with properly formatted SSE message
+                    // MCP expects a JSON response
+                    String responseJson = "{\"content\":\"" + triggerInput + "\"}";
                     return request.createResponseBuilder(HttpStatus.OK)
                             .header("Content-Type", "text/event-stream")
-                            .body("data: " + triggerInput + "\n\n")
+                            .body("data: " + responseJson + "\n\n")
                             .build();
                 }
-            }
-            
-            // Handle SSE connection establishment
-            if (request.getHttpMethod() == HttpMethod.GET) {
-                context.getLogger().info("Establishing SSE connection");
-                return request.createResponseBuilder(HttpStatus.OK)
-                        .header("Content-Type", "text/event-stream")
-                        .header("Cache-Control", "no-cache")
-                        .header("Connection", "keep-alive")
-                        .body("data: Connected to MCP server\n\n")
-                        .build();
             }
             
             return request.createResponseBuilder(HttpStatus.BAD_REQUEST)
