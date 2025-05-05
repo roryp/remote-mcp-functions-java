@@ -1,0 +1,10 @@
+name: remote-mcp-functions-java
+metadata:
+  template: remote-mcp-functions-java@0.0.1
+services:
+  api:
+    project: ./
+    language: java
+    host: function
+infra:
+  provider: bicep

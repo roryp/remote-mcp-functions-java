@@ -6,7 +6,7 @@ import com.microsoft.azure.functions.OutputBinding;
 import com.microsoft.azure.functions.annotation.BlobInput;
 import com.microsoft.azure.functions.annotation.BlobOutput;
 import com.microsoft.azure.functions.annotation.FunctionName;
-import com.microsoft.azure.functions.annotation.McpToolTrigger;
+import com.function.annotation.McpToolTrigger;
 import com.microsoft.azure.functions.annotation.StorageAccount;
 
 import com.google.gson.JsonObject;

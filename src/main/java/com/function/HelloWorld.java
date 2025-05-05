@@ -2,7 +2,7 @@ package com.function;
 
 import com.microsoft.azure.functions.ExecutionContext;
 import com.microsoft.azure.functions.annotation.FunctionName;
-import com.microsoft.azure.functions.annotation.McpToolTrigger;
+import com.function.annotation.McpToolTrigger;
 
 /**
  * Demonstrates a simple Azure Function that prints a provided string and logs "Hello, World!".
