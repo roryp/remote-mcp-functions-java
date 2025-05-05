@@ -1,12 +1,21 @@
 package com.function;
 
 import com.microsoft.azure.functions.ExecutionContext;
+import com.microsoft.azure.functions.HttpMethod;
+import com.microsoft.azure.functions.HttpRequestMessage;
+import com.microsoft.azure.functions.HttpResponseMessage;
+import com.microsoft.azure.functions.HttpStatus;
+import com.microsoft.azure.functions.annotation.AuthorizationLevel;
 import com.microsoft.azure.functions.annotation.FunctionName;
-import com.function.annotation.McpToolTrigger;
+import com.microsoft.azure.functions.annotation.HttpTrigger;
+
+import java.util.Optional;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 /**
  * Demonstrates a simple Azure Function that prints a provided string and logs "Hello, World!".
- * This function is triggered by an MCP Tool Trigger, which provides the input JSON.
+ * This function is triggered by an HTTP request, handling MCP tool invocations.
  */
 public class HelloWorld {
     /**
@@ -30,23 +39,68 @@ public class HelloWorld {
      *   <li>Logs "Hello, World!" to demonstrate a simple response.</li>
      * </ul>
      *
-     * @param triggerInput The JSON argument provided by the MCP tool. Extracted as a string.
-     * @param context      The execution context for logging and tracing function execution.
+     * @param request  The HTTP request message with JSON payload
+     * @param context  The execution context for logging and tracing function execution.
+     * @return HTTP response with the tool invocation result
      */
     @FunctionName("HelloWorld")
-    public void logCustomTriggerInput(
-            @McpToolTrigger(
-                    toolName = "getsnippets",
-                    description = "Gets code snippets from your snippet collection.",
-                    toolProperties = ARGUMENTS
-            )
-            String triggerInput,
+    public HttpResponseMessage run(
+            @HttpTrigger(
+                    name = "req", 
+                    methods = {HttpMethod.GET, HttpMethod.POST},
+                    authLevel = AuthorizationLevel.FUNCTION, 
+                    route = "webhooks/mcp/sse"
+            ) HttpRequestMessage<Optional<String>> request,
             final ExecutionContext context
     ) {
-        // Log the input passed in from the MCP tool
-        context.getLogger().info(triggerInput);
-
-        // Log a simple message
-        context.getLogger().info("Hello, World!");
+        context.getLogger().info("Processing MCP request");
+        
+        // Parse incoming request
+        String jsonBody = request.getBody().orElse("{}");
+        context.getLogger().info("Request body: " + jsonBody);
+        
+        try {
+            JsonObject jsonObject = JsonParser.parseString(jsonBody).getAsJsonObject();
+            
+            // Check if this is an MCP tool invocation
+            if (jsonObject.has("name") && jsonObject.has("arguments")) {
+                String toolName = jsonObject.get("name").getAsString();
+                JsonObject arguments = jsonObject.get("arguments").getAsJsonObject();
+                
+                if ("getsnippets".equals(toolName) && arguments.has("triggerInput")) {
+                    String triggerInput = arguments.get("triggerInput").getAsString();
+                    context.getLogger().info("MCP Tool: " + toolName);
+                    context.getLogger().info("Trigger input: " + triggerInput);
+                    context.getLogger().info("Hello, World!");
+                    
+                    // Return successful response with data
+                    return request.createResponseBuilder(HttpStatus.OK)
+                            .header("Content-Type", "text/event-stream")
+                            .body("data: " + triggerInput + "\n\n")
+                            .build();
+                }
+            }
+            
+            // Handle SSE connection establishment
+            if (request.getHttpMethod() == HttpMethod.GET) {
+                context.getLogger().info("Establishing SSE connection");
+                return request.createResponseBuilder(HttpStatus.OK)
+                        .header("Content-Type", "text/event-stream")
+                        .header("Cache-Control", "no-cache")
+                        .header("Connection", "keep-alive")
+                        .body("data: Connected to MCP server\n\n")
+                        .build();
+            }
+            
+            return request.createResponseBuilder(HttpStatus.BAD_REQUEST)
+                    .body("Invalid MCP tool request format")
+                    .build();
+            
+        } catch (Exception e) {
+            context.getLogger().severe("Error processing request: " + e.getMessage());
+            return request.createResponseBuilder(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error processing request: " + e.getMessage())
+                    .build();
+        }
     }
 }

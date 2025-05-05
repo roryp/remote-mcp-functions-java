@@ -1,0 +1,12 @@
+{
+  "name": "mcp-test",
+  "version": "1.0.0",
+  "description": "Test script for MCP server",
+  "main": "test-mcp.js",
+  "dependencies": {
+    "eventsource": "^2.0.2",
+    "node-fetch": "^2.6.9"
+  },
+  "author": "",
+  "license": "MIT"
+}
